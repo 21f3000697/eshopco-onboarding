@@ -13,15 +13,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load data from file
+# Load data from file (list of dicts)
 with open("q-vercel-python.json") as f:
     marks_data = json.load(f)
 
 @app.get("/api")
 def get_marks(name: str = "", name2: str = ""):
     result = []
-    if name in marks_data:
-        result.append(marks_data[name])
-    if name2 in marks_data:
-        result.append(marks_data[name2])
+    for entry in marks_data:
+        if entry["name"] == name:
+            result.append(entry["marks"])
+        if name2 and entry["name"] == name2 and name2 != name:
+            result.append(entry["marks"])
     return {"marks": result}
+
+# Optional: root endpoint for friendly message
+@app.get("/")
+def root():
+    return {"message": "API is running! Use /api?name=...&name2=..."}
+
